@@ -31,7 +31,9 @@ def get_card(card, set_code, rarity) -> Panel:
     grid.add_row(get_title(card))
     grid.add_row(get_typeline(card, set_code, rarity))
     grid.add_row(get_rules(card))
-    grid.add_row(get_flavor_pt(card))
+    fptl = get_flavor_pt(card)
+    if fptl is not None:
+        grid.add_row(fptl)
     panel = Panel(grid, expand=False)
     return panel
 
@@ -77,6 +79,9 @@ def get_flavor_pt(card) -> Panel:
     if "loyalty" in card:
         loyal = "[{}]"
         grid.add_row(loyal.format(card["loyalty"]), style="bold")
+    if grid.columns.count(0)== 0:
+        return None
+
     panel = Panel(grid, expand=False)
     return panel
 
