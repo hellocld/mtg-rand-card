@@ -9,4 +9,6 @@ Make sure you've got Rich on your system and an internet connection, and just ru
 - CLI argments
   - Passing search parameters to Scryfall via the console would be nice
 - Planeswalker-specific display logic
+- Card coloring
+- Border color/acorn badge
 
