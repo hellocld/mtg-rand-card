@@ -1,40 +1,82 @@
 #!/usr/bin/python
 
 import sys
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+from rich import print
 import requests
 
 api_url = "https://api.scryfall.com"
 ep_random = "/cards/random"
 
+# Styles
+st_rarity = {
+    "common": "bold white on black",
+    "uncommon": "bold white on grey50",
+    "rare": "bold black on gold1",
+    "special": "bold black on purple",
+    "mythic": "bold black on orange_red1",
+    "bonus": "bold black on yellow3"
+}
+
+st_link = "link {}"
+
 
 # Display card data
-def print_card(card, set_code, url):
-# -Name
-# -Cost
+def get_card(card, set_code) -> Panel:
+    grid = Table.grid(expand=False)
+    grid.width = 40
+    grid.add_column()
+    grid.add_row(get_title(card))
+    grid.add_row(get_typeline(card, set_code))
+    grid.add_row(get_rules(card))
+    grid.add_row(get_flavor_pt(card))
+    panel = Panel(grid, expand=False)
+    return panel
+
+
+def get_title(card) -> Panel:
+    title = Table.grid(expand=False)
+    title.width = 36
+    title.add_column(style="bold")
     if "mana_cost" in card:
-        name_line = "{} | {}"
-        print(name_line.format(card["name"], card["mana_cost"]))
+        title.add_column(justify="right")
+        title.add_row(card["name"], card["mana_cost"])
     else:
-        print(card["name"])
-# -Typeline
-# -Set
-    if "type_line" in card:
-        type_line = "{} - {}"
-        print(type_line.format(card["type_line"], set_code))
-    else:
-        print(set_code)
-# -Rules
+        title.add_row(card["name"])
+    panel = Panel(title, expand=False)
+    return panel
+
+
+def get_typeline(card, set_code) -> Panel:
+    typeline = Table.grid(expand=False)
+    typeline.width = 36
+    typeline.add_column()
+    typeline.add_column(justify="center", style=st_rarity[card["rarity"].strip()])
+    typeline.add_row(card["type_line"], set_code)
+    panel = Panel(typeline, expand=False)
+    return panel
+
+
+def get_rules(card) -> Panel:
     if "oracle_text" in card:
-        print(card["oracle_text"])
-# -Power/Toughness
+        return Panel(card["oracle_text"], width=40)
+    else:
+        return Panel("", width=40)
+
+def get_flavor_pt(card) -> Panel:
+    grid = Table.grid(expand=False)
+    grid.width = 36
+    grid.add_column(justify="right")
+    if "flavor_text" in card:
+        grid.add_row(card["flavor_text"], style="italic")
     if "power" in card and "toughness" in card:
         pt = "({}/{})"
-        print(pt.format(card["power"], card["toughness"]))
-# -Flavortext
-    if "flavor_text" in card:
-        print(card["flavor_text"])
-# -Scryfall URL
-    print(url)
+        grid.add_row(pt.format(card["power"], card["toughness"]), style="bold")
+    panel = Panel(grid, expand=False)
+    return panel
+
 
 
 def main():
@@ -45,14 +87,20 @@ def main():
         print("Error acquiring card!")
         print(card_response.reason)
         return
-
+    console = Console()
     card_dict = card_response.json()
+    print(card_dict["rarity"])
     # Check if it's multiface or not
     if "card_faces" in card_dict:
+        grid = Table.grid(expand=False)
+        grid.add_column()
         for face in card_dict["card_faces"]:
-            print_card(face, card_dict["set"], card_dict["scryfall_uri"])
+            grid.add_row(get_card(face, card_dict["set"]))
+        console.print(grid)
     else:
-        print_card(card_dict, card_dict["set"], card_dict["scryfall_uri"])
+        console.print(get_card(card_dict, card_dict["set"]))
+
+    console.print(card_dict["scryfall_uri"], style=st_link.format(card_dict["scryfall_uri"]))
 
 if __name__ == '__main__':
     sys.exit(main())
