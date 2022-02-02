@@ -24,12 +24,12 @@ st_link = "link {}"
 
 
 # Display card data
-def get_card(card, set_code) -> Panel:
+def get_card(card, set_code, rarity) -> Panel:
     grid = Table.grid(expand=False)
     grid.width = 40
     grid.add_column()
     grid.add_row(get_title(card))
-    grid.add_row(get_typeline(card, set_code))
+    grid.add_row(get_typeline(card, set_code, rarity))
     grid.add_row(get_rules(card))
     grid.add_row(get_flavor_pt(card))
     panel = Panel(grid, expand=False)
@@ -49,11 +49,11 @@ def get_title(card) -> Panel:
     return panel
 
 
-def get_typeline(card, set_code) -> Panel:
+def get_typeline(card, set_code, rarity) -> Panel:
     typeline = Table.grid(expand=False)
     typeline.width = 36
     typeline.add_column()
-    typeline.add_column(justify="center", style=st_rarity[card["rarity"].strip()])
+    typeline.add_column(justify="center", style=st_rarity[rarity])
     typeline.add_row(card["type_line"], set_code)
     panel = Panel(typeline, expand=False)
     return panel
@@ -89,16 +89,17 @@ def main():
         return
     console = Console()
     card_dict = card_response.json()
-    print(card_dict["rarity"])
     # Check if it's multiface or not
     if "card_faces" in card_dict:
-        grid = Table.grid(expand=False)
-        grid.add_column()
+        grid = Table.grid(expand=False, padding=2)
+        cells = []
         for face in card_dict["card_faces"]:
-            grid.add_row(get_card(face, card_dict["set"]))
+            grid.add_column(vertical="middle")
+            cells.append(get_card(face, card_dict["set"], card_dict["rarity"].strip()))
+        grid.add_row(*cells)
         console.print(grid)
     else:
-        console.print(get_card(card_dict, card_dict["set"]))
+        console.print(get_card(card_dict, card_dict["set"], card_dict["rarity"].strip()))
 
     console.print(card_dict["scryfall_uri"], style=st_link.format(card_dict["scryfall_uri"]))
 
