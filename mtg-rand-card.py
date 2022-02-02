@@ -5,6 +5,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich import print
+from rich import box
 import requests
 
 api_url = "https://api.scryfall.com"
@@ -38,6 +39,24 @@ def get_card(card, set_code, rarity) -> Panel:
     return panel
 
 
+def get_color_ident(card) -> str:
+    if "colors" not in card or len(card["colors"]) == 0:
+        return "none"
+    if len(card["colors"]) > 1:
+        return "gold1"
+    color = card["colors"][0]
+    if color == "W":
+        return "cornsilk1"
+    if color == "U":
+        return "blue1"
+    if color == "B":
+        return "purple4"
+    if color == "R":
+        return "red3"
+    if color == "G":
+        return "green4"
+    return "none"
+
 def get_title(card) -> Panel:
     title = Table.grid(expand=False)
     title.width = 36
@@ -48,6 +67,7 @@ def get_title(card) -> Panel:
     else:
         title.add_row(card["name"])
     panel = Panel(title, expand=False)
+    panel.border_style = get_color_ident(card)
     return panel
 
 
@@ -58,14 +78,15 @@ def get_typeline(card, set_code, rarity) -> Panel:
     typeline.add_column(justify="center", style=st_rarity[rarity])
     typeline.add_row(card["type_line"], set_code)
     panel = Panel(typeline, expand=False)
+    panel.border_style = get_color_ident(card)
     return panel
 
 
 def get_rules(card) -> Panel:
     if "oracle_text" in card:
-        return Panel(card["oracle_text"], width=40)
+        return Panel(card["oracle_text"], width=40, border_style=get_color_ident(card))
     else:
-        return Panel("", width=40)
+        return Panel("", width=40, border_style=get_color_ident(card))
 
 def get_flavor_pt(card) -> Panel:
     grid = Table.grid(expand=False)
@@ -83,6 +104,7 @@ def get_flavor_pt(card) -> Panel:
         return None
 
     panel = Panel(grid, expand=False)
+    panel.border_style = get_color_ident(card)
     return panel
 
 
