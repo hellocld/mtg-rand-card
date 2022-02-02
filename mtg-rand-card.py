@@ -74,6 +74,9 @@ def get_flavor_pt(card) -> Panel:
     if "power" in card and "toughness" in card:
         pt = "({}/{})"
         grid.add_row(pt.format(card["power"], card["toughness"]), style="bold")
+    if "loyalty" in card:
+        loyal = "[{}]"
+        grid.add_row(loyal.format(card["loyalty"]), style="bold")
     panel = Panel(grid, expand=False)
     return panel
 
