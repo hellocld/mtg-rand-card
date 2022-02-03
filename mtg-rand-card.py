@@ -57,13 +57,18 @@ def get_color_ident(card) -> str:
         return "green4"
     return "none"
 
+
+def colorize_text(text) -> str:
+    return text.replace("{W}", "{[cornsilk1]W[/cornsilk1]}").replace("{U}", "{[blue1]U[/blue1]}").replace("{B}", "{[purple4]B[/purple4]}").replace("{R}", "{[red3]R[/red3]}").replace("{G}", "{[green4]G[/green4]}")
+
+
 def get_title(card) -> Panel:
     title = Table.grid(expand=False)
     title.width = 36
     title.add_column(style="bold")
     if "mana_cost" in card:
         title.add_column(justify="right")
-        title.add_row(card["name"], card["mana_cost"])
+        title.add_row(card["name"], colorize_text(card["mana_cost"]))
     else:
         title.add_row(card["name"])
     panel = Panel(title, expand=False)
@@ -84,7 +89,7 @@ def get_typeline(card, set_code, rarity) -> Panel:
 
 def get_rules(card) -> Panel:
     if "oracle_text" in card:
-        return Panel(card["oracle_text"], width=40, border_style=get_color_ident(card))
+        return Panel(colorize_text(card["oracle_text"]), width=40, border_style=get_color_ident(card))
     else:
         return Panel("", width=40, border_style=get_color_ident(card))
 
