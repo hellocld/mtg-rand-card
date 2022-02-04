@@ -105,8 +105,6 @@ def get_flavor_pt(card) -> Panel:
     if "loyalty" in card:
         loyal = "[{}]"
         grid.add_row(loyal.format(card["loyalty"]), style="bold")
-    if grid.columns.count(0)== 0:
-        return None
 
     panel = Panel(grid, expand=False)
     panel.border_style = get_color_ident(card)
